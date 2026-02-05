@@ -1,0 +1,36 @@
+{
+  "rubric": [
+    {
+      "criterion": "Identifies the CREATE_NEW handling bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java getOrCreateRegularFile where existing files are opened even when CREATE_NEW is specified",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the regular-file lookup bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java lookUpRegularFile where non-regular files return null instead of throwing FileSystemException",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the CREATE_NEW enforcement bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java getOrCreateRegularFileWithWriteLock where createFile is called with failIfExists=false",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the directory stream link-handling bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java newDirectoryStream where NOFOLLOW_LINKS is always used",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the cross-filesystem hard-link bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java link where the same-file-system check is removed",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the hard-link equality bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java isSameFile where DirectoryEntry equality is used instead of file identity",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the move-into-subdir bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java copy where checkNotAncestor is skipped for same-FS moves",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the REPLACE_EXISTING bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java copy where the source entry is deleted instead of the destination",
+      "weight": 1
+    }
+  ]
+}
