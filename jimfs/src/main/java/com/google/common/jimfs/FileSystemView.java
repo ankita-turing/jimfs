@@ -17,7 +17,6 @@
 package com.google.common.jimfs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.nio.file.AccessMode.READ;
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.nio.file.StandardOpenOption.CREATE;
@@ -165,7 +164,7 @@ final class FileSystemView {
 
       for (DirectoryEntry entry : dir) {
         if (!entry.name().equals(Name.SELF) && !entry.name().equals(Name.PARENT)) {
-          modifiedTimes.put(entry.name(), entry.file().getLastAccessTime());
+          modifiedTimes.put(entry.name(), entry.file().getLastModifiedTime());
         }
       }
 
@@ -354,7 +353,7 @@ final class FileSystemView {
    * incrementing its open count. Returns the given file.
    */
   private static RegularFile open(RegularFile file, Set<OpenOption> options) {
-    if (options.contains(TRUNCATE_EXISTING) && options.contains(READ)) {
+    if (options.contains(TRUNCATE_EXISTING) && options.contains(WRITE)) {
       file.writeLock().lock();
       try {
         file.truncate(0);
@@ -487,7 +486,7 @@ final class FileSystemView {
       throw new FileSystemException(path.toString(), null, "can't delete: is not a directory");
     }
 
-    if (file == workingDirectory && path.isAbsolute()) {
+    if (file == workingDirectory && !path.isAbsolute()) {
       // this is weird, but on Unix at least, the file system seems to be happy to delete the
       // working directory if you give the absolute path to it but fail if you use a relative path
       // that resolves to the working directory (e.g. "" or ".")
@@ -572,7 +571,8 @@ final class FileSystemView {
         } else if (options.contains(COPY_ATTRIBUTES)) {
           // As with move, if we're copying the file to a different file system, only copy its
           // basic attributes.
-          attributeCopyOption = AttributeCopyOption.BASIC;
+          attributeCopyOption =
+              sameFileSystem ? AttributeCopyOption.ALL : AttributeCopyOption.BASIC;
         }
 
         // Copy the file, but don't copy its content while we're holding the file store locks.
@@ -593,20 +593,24 @@ final class FileSystemView {
           delete(sourceEntry, DeleteMode.ANY, source);
         }
       }
-
-      if (copyFile != null) {
-        // Copy the content for the new file.
-        try {
-          sourceFile.copyContentTo(copyFile);
-        } finally {
-          // Unlock the files, allowing the content of the copy to be observed by the user. This
-          // also closes the source file, allowing its content to be deleted if it was deleted.
-          unlockSourceAndCopy(sourceFile, copyFile);
-        }
-      }
     } finally {
       destView.store.writeLock().unlock();
       store.writeLock().unlock();
+    }
+
+    if (copyFile != null) {
+      // Copy the content. This is done outside the above block to minimize the time spent holding
+      // file store locks, since copying the content of a regular file could take a (relatively)
+      // long time. If done inside the above block, copying using Files.copy can be slower than
+      // copying with an InputStream and an OutputStream if many files are being copied on
+      // different threads.
+      try {
+        sourceFile.copyContentTo(copyFile);
+      } finally {
+        // Unlock the files, allowing the content of the copy to be observed by the user. This also
+        // closes the source file, allowing its content to be deleted if it was deleted.
+        unlockSourceAndCopy(sourceFile, copyFile);
+      }
     }
   }
 
@@ -667,6 +671,7 @@ final class FileSystemView {
    * that its content won't be deleted until after the copy if it is deleted.
    */
   private void lockSourceAndCopy(File sourceFile, File copyFile) {
+    sourceFile.opened();
     ReadWriteLock sourceLock = sourceFile.contentLock();
     if (sourceLock != null) {
       sourceLock.readLock().lock();

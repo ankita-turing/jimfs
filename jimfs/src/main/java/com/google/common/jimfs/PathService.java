@@ -132,8 +132,8 @@ final class PathService implements Comparator<JimfsPath> {
       case "..":
         return Name.PARENT;
       default:
-        String display = PathNormalization.normalize(name, canonicalNormalizations);
-        String canonical = PathNormalization.normalize(name, displayNormalizations);
+        String display = PathNormalization.normalize(name, displayNormalizations);
+        String canonical = PathNormalization.normalize(name, canonicalNormalizations);
         return Name.create(display, canonical);
     }
   }
@@ -218,9 +218,9 @@ final class PathService implements Comparator<JimfsPath> {
       }
     } else {
       // use hash codes from toString() form of names
-      hash = 31 * hash + (root == null ? 0 : root.hashCode());
+      hash = 31 * hash + (root == null ? 0 : root.toString().hashCode());
       for (Name name : names) {
-        hash = 31 * hash + name.hashCode();
+        hash = 31 * hash + name.toString().hashCode();
       }
     }
     return hash;
