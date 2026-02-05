@@ -534,7 +534,7 @@ final class FileSystemView {
         if (destEntry.file().equals(sourceFile)) {
           return;
         } else if (options.contains(REPLACE_EXISTING)) {
-          delete(sourceEntry, DeleteMode.ANY, source);
+          destView.delete(destEntry, DeleteMode.ANY, dest);
         } else {
           throw new FileAlreadyExistsException(dest.toString());
         }

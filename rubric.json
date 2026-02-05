@@ -29,7 +29,7 @@
       "weight": 1
     },
     {
-      "criterion": "Identifies the REPLACE_EXISTING bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java copy where the source entry is deleted instead of the destination",
+      "criterion": "Identifies the intermediate symlink bug in jimfs/src/main/java/com/google/common/jimfs/FileTree.java lookUp where NOFOLLOW_LINKS causes a null traversal for symlinks in the middle of the path",
       "weight": 1
     }
   ]
