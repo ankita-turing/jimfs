@@ -1,0 +1,200 @@
+{
+  "rubric": [
+    {
+      "criterion": "Identifies the CREATE_NEW handling bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java getOrCreateRegularFile where existing files are opened even when CREATE_NEW is specified",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the regular-file lookup bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java lookUpRegularFile where non-regular files return null instead of throwing FileSystemException",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the CREATE_NEW enforcement bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java getOrCreateRegularFileWithWriteLock where createFile is called with failIfExists=false",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the directory stream link-handling bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java newDirectoryStream where NOFOLLOW_LINKS is always used",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the cross-filesystem hard-link bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java link where the same-file-system check is removed",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the hard-link equality bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java isSameFile where DirectoryEntry equality is used instead of file identity",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the toRealPath ordering bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java toRealPath where names are not reversed before creating the path",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the delete locking bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java deleteFile where a read lock is used instead of a write lock",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the move-into-subdir bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java copy where checkNotAncestor is skipped for same-FS moves",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the REPLACE_EXISTING bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java copy where the source entry is deleted instead of the destination",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the readAttributes link-option bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java readAttributes(String,...) where FOLLOW_LINKS is always used",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the setAttribute link-option bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java setAttribute where FOLLOW_LINKS is always used",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the checkAccess link-option bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java checkAccess where NOFOLLOW_LINKS is always used",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the createDirectory idempotency bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java createDirectory where existing directories are allowed",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the readSymbolicLink resolution bug in jimfs/src/main/java/com/google/common/jimfs/FileSystemView.java readSymbolicLink where the target is resolved to a real path",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the missing-root fallback bug in jimfs/src/main/java/com/google/common/jimfs/FileTree.java lookUp where unknown roots fall back to working directory",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the empty-path handling bug in jimfs/src/main/java/com/google/common/jimfs/FileTree.java lookUp where EMPTY_PATH_NAMES substitution is removed",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the intermediate symlink bug in jimfs/src/main/java/com/google/common/jimfs/FileTree.java lookUp where NOFOLLOW_LINKS causes a null traversal for symlinks in the middle of the path",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the symlink-resolution bug in jimfs/src/main/java/com/google/common/jimfs/FileTree.java followSymbolicLink where NOFOLLOW_LINKS is used for the target lookup",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the real-entry bug in jimfs/src/main/java/com/google/common/jimfs/FileTree.java getRealEntry where '.' and '..' entries are not resolved to their parent entry",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the empty-path predicate bug in jimfs/src/main/java/com/google/common/jimfs/FileTree.java isEmpty where a single empty-name path is not treated as empty",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the link-count decrement bug in jimfs/src/main/java/com/google/common/jimfs/Directory.java remove where decrementLinkCount is omitted",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the directory resize-threshold bug in jimfs/src/main/java/com/google/common/jimfs/Directory.java expandIfNeeded where the resize is skipped at threshold",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the bucket index bug in jimfs/src/main/java/com/google/common/jimfs/Directory.java bucketIndex where modulo can yield negative indices",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the iterator bug in jimfs/src/main/java/com/google/common/jimfs/Directory.java iterator where pre-increment skips entries in the first bucket",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the reserved-name link bug in jimfs/src/main/java/com/google/common/jimfs/Directory.java link where checkNotReserved is skipped",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the forcePut bug in jimfs/src/main/java/com/google/common/jimfs/Directory.java forcePut where overwrite is disabled",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the isEmpty boundary bug in jimfs/src/main/java/com/google/common/jimfs/Directory.java isEmpty where entryCount < 2 is treated as empty",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the truncate boundary bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java truncate where lastPosition is set to size, not size-1",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the truncate over-free bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java truncate where disk.free is called with blocksToRemove + 1",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the write allocation off-by-one in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java prepareForWrite where additionalBlocksNeeded subtracts 1",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the sparse-write size bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java prepareForWrite where size is set to end rather than pos",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the write size update bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java write(byte[],...) where size is set to endPos-1",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the ByteBuffer length bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java write(ByteBuffer) where capacity is used instead of remaining",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the signed-byte read bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java read(long) where the byte value is returned without unsigned conversion",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the read length bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java read(byte[],...) where length(remaining) ignores offsetInBlock",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the scatter-read EOF bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java read(Iterable<ByteBuffer>) where EOF returns 0 instead of -1",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the transferFrom EOF guard bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java transferFrom where startPos >= size prevents EOF appends",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the transferFrom size update bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java transferFrom where size is not updated after writing",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the transferTo block offset bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java transferTo where subsequent blocks are wrapped with the original offset",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the copyBlocksTo off-by-one bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java copyBlocksTo where start is blockCount - count - 1",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the transferBlocksTo truncation bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java transferBlocksTo where truncateBlocks uses blockCount - count - 1",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the truncateBlocks clearing bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java truncateBlocks where clear length is blockCount - count - 1",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the deleteContents size bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java deleteContents where size is not reset to 0",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the open-count decrement bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java closed where openCount-- is used instead of --openCount",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the hard-link delete bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java deleted where content is freed even when links remain",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the EOF bytesToRead bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java bytesToRead where 0 is returned instead of -1",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the block length bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java length(int,long) where offset is ignored",
+      "weight": 1
+    },
+    {
+      "criterion": "Identifies the blockIndex overflow bug in jimfs/src/main/java/com/google/common/jimfs/RegularFile.java blockIndex where the cast occurs before division",
+      "weight": 1
+    }
+  ]
+}

